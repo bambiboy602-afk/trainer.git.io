@@ -23,6 +23,7 @@ import {
   HeartHandshake,
   Sparkles,
   Zap,
+  Brain,
   Info,
   Calendar,
   Layers,
@@ -46,12 +47,14 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
     clarity: boolean;
     deEscalation: boolean;
     activeListening: boolean;
+    logicalReasoning: boolean;
   }>({
     empathy: true,
     assertiveness: true,
     clarity: true,
     deEscalation: true,
-    activeListening: false
+    activeListening: false,
+    logicalReasoning: true
   });
 
   // Extract or synthesize progressive history
@@ -78,6 +81,7 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
       100,
       Math.max(10, Math.round(currentEmpathy * 0.6 + currentDeEscalation * 0.4))
     );
+    const currentLogicalReasoning = getSpectrum('reasoning_mode', 50);
 
     if (rawHistory.length >= 2) {
       return rawHistory;
@@ -93,6 +97,7 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
       clarity: 50,
       deEscalation: 50,
       activeListening: 50,
+      logicalReasoning: 50,
       label: 'Baseline'
     };
 
@@ -108,6 +113,7 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
           clarity: 53,
           deEscalation: 51,
           activeListening: 50,
+          logicalReasoning: 55,
           label: 'Initial Check'
         }
       ];
@@ -123,6 +129,7 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
       clarity: Math.round(50 + (currentClarity - 50) * 0.45),
       deEscalation: Math.round(50 + (currentDeEscalation - 50) * 0.45),
       activeListening: Math.round(50 + (currentActiveListening - 50) * 0.45),
+      logicalReasoning: Math.round(50 + (currentLogicalReasoning - 50) * 0.45),
       label: `Turn ${midCount}`
     };
 
@@ -135,6 +142,7 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
       clarity: currentClarity,
       deEscalation: currentDeEscalation,
       activeListening: currentActiveListening,
+      logicalReasoning: currentLogicalReasoning,
       label: `Current (${userMessageCount})`
     };
 
@@ -176,6 +184,12 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
         current: latest?.activeListening ?? 50,
         baseline: initial?.activeListening ?? 50,
         fullMark: 100
+      },
+      {
+        metric: 'Logical Reasoning',
+        current: latest?.logicalReasoning ?? 50,
+        baseline: initial?.logicalReasoning ?? 50,
+        fullMark: 100
       }
     ];
   }, [history]);
@@ -211,6 +225,12 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
       color: '#7c3aed', // violet-600
       icon: Zap,
       description: 'Reflecting nuances and asking clarifying questions'
+    },
+    logicalReasoning: {
+      label: 'Logical Reasoning',
+      color: '#475569', // slate-600
+      icon: Brain,
+      description: 'Analytical, first-principles thinking and objective logic'
     }
   };
 
@@ -286,7 +306,7 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
 
       {/* Metric Stat Badges & Toggles */}
       <div className="p-4 border-b border-stone-100 bg-stone-50/30">
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {(Object.keys(metricConfig) as Array<keyof typeof metricConfig>).map((key) => {
             const conf = metricConfig[key];
             const isSelected = selectedMetrics[key];
@@ -437,6 +457,17 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
                     activeDot={{ r: 6 }}
                   />
                 )}
+                {selectedMetrics.logicalReasoning && (
+                  <Line
+                    type="monotone"
+                    dataKey="logicalReasoning"
+                    name="Logical Reasoning"
+                    stroke={metricConfig.logicalReasoning.color}
+                    strokeWidth={2.5}
+                    dot={{ r: 4, strokeWidth: 1.5, fill: '#ffffff' }}
+                    activeDot={{ r: 6 }}
+                  />
+                )}
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -456,6 +487,10 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
                   <linearGradient id="clarityGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={metricConfig.clarity.color} stopOpacity={0.35} />
                     <stop offset="95%" stopColor={metricConfig.clarity.color} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="logicalGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={metricConfig.logicalReasoning.color} stopOpacity={0.35} />
+                    <stop offset="95%" stopColor={metricConfig.logicalReasoning.color} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -510,6 +545,16 @@ export const CommunicationProgressChart: React.FC<CommunicationProgressChartProp
                     stroke={metricConfig.clarity.color}
                     fillOpacity={1}
                     fill="url(#clarityGrad)"
+                  />
+                )}
+                {selectedMetrics.logicalReasoning && (
+                  <Area
+                    type="monotone"
+                    dataKey="logicalReasoning"
+                    name="Logical Reasoning"
+                    stroke={metricConfig.logicalReasoning.color}
+                    fillOpacity={1}
+                    fill="url(#logicalGrad)"
                   />
                 )}
               </AreaChart>

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { PersonaProfile, ScenarioEvaluation } from '../types';
 import { CommunicationProgressChart } from './CommunicationProgressChart';
+import { LatestAnalysisRadar } from './LatestAnalysisRadar';
 import { MilestonesView } from './MilestonesView';
 import { computeMilestoneBadges } from '../lib/milestones';
 
@@ -213,7 +214,9 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {activeTab === 'progress' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <LatestAnalysisRadar profile={profile} />
+
               <CommunicationProgressChart
                 profile={profile}
                 userMessageCount={userMessageCount}

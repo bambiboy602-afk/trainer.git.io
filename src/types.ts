@@ -98,6 +98,7 @@ export interface ProgressSnapshot {
   clarity: number;        // 0 - 100 (directness, coherence, precision)
   deEscalation: number;   // 0 - 100 (calmness, regulation under pressure)
   activeListening: number;// 0 - 100 (reflecting emotional needs)
+  logicalReasoning: number; // 0 - 100 (analytical vs intuitive)
   label?: string;         // e.g. "Session 1", "After Roleplay 2"
 }
 

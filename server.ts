@@ -591,6 +591,7 @@ Return strictly valid JSON conforming to the requested schema.`;
 
       const directnessScore = getScore("directness", 50);
       const boundaryScore = getScore("boundary_strength", 50);
+      const reasoningScore = getScore("reasoning_mode", 50);
       const empathyScore = parsed.socialGrowthFeedback?.empathyScore ?? getScore("social_empathy", 50);
       const deEscalationScore = parsed.socialGrowthFeedback?.deEscalationScore ?? getScore("de_escalation", 50);
 
@@ -600,6 +601,8 @@ Return strictly valid JSON conforming to the requested schema.`;
       const assertivenessScore = boundaryScore;
       // Active listening is derived from empathy & de-escalation
       const activeListeningScore = Math.min(100, Math.max(10, Math.round((empathyScore * 0.6) + (deEscalationScore * 0.4))));
+      // Logical Reasoning is reasoning mode
+      const logicalReasoningScore = reasoningScore;
 
       const previousHistory = Array.isArray(currentProfile?.progressHistory)
         ? currentProfile.progressHistory
@@ -613,6 +616,7 @@ Return strictly valid JSON conforming to the requested schema.`;
               clarity: 50,
               deEscalation: 50,
               activeListening: 50,
+              logicalReasoning: 50,
               label: "Baseline",
             },
           ];
@@ -626,6 +630,7 @@ Return strictly valid JSON conforming to the requested schema.`;
         clarity: clarityScore,
         deEscalation: deEscalationScore,
         activeListening: activeListeningScore,
+        logicalReasoning: logicalReasoningScore,
         label: `Turn ${userMessages.length}`,
       };
 

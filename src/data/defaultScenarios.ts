@@ -1074,6 +1074,7 @@ export const INITIAL_EMPTY_PROFILE: PersonaProfile = {
       clarity: 50,
       deEscalation: 50,
       activeListening: 50,
+      logicalReasoning: 50,
       label: 'Baseline'
     }
   ]

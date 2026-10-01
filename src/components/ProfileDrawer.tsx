@@ -27,6 +27,7 @@ import { CommunicationProgressChart } from './CommunicationProgressChart';
 import { LatestAnalysisRadar } from './LatestAnalysisRadar';
 import { MilestonesView } from './MilestonesView';
 import { computeMilestoneBadges } from '../lib/milestones';
+import { calculateArchetypeMatches } from '../data/benchmarkArchetypes';
 
 interface ProfileDrawerProps {
   isOpen: boolean;
@@ -62,6 +63,35 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     [profile, userMessageCount, evaluations]
   );
   const unlockedBadgesCount = milestoneBadges.filter((b) => b.isUnlocked).length;
+
+  const userScores = React.useMemo(() => {
+    if (profile.progressHistory && profile.progressHistory.length > 0) {
+      const snap = profile.progressHistory[profile.progressHistory.length - 1];
+      return {
+        empathy: snap.empathy ?? 50,
+        assertiveness: snap.assertiveness ?? 50,
+        clarity: snap.clarity ?? 50,
+        deEscalation: snap.deEscalation ?? 50,
+        activeListening: snap.activeListening ?? 50,
+        logicalReasoning: snap.logicalReasoning ?? 50
+      };
+    }
+    const getSpectrum = (id: string, fallback = 50) =>
+      profile.spectrums?.find((s) => s.id === id)?.score ?? fallback;
+    return {
+      empathy: profile.socialGrowthFeedback?.empathyScore ?? getSpectrum('social_empathy', 50),
+      assertiveness: getSpectrum('boundary_strength', 50),
+      clarity: Math.min(100, Math.max(10, Math.round(getSpectrum('directness', 50) * 0.7 + (profile.completenessScore || 0) * 0.3))),
+      deEscalation: profile.socialGrowthFeedback?.deEscalationScore ?? getSpectrum('de_escalation', 50),
+      activeListening: Math.min(100, Math.max(10, Math.round((profile.socialGrowthFeedback?.empathyScore ?? 50) * 0.6 + (profile.socialGrowthFeedback?.deEscalationScore ?? 50) * 0.4))),
+      logicalReasoning: getSpectrum('reasoning_mode', 50)
+    };
+  }, [profile]);
+
+  const topArchetype = React.useMemo(() => {
+    const matches = calculateArchetypeMatches(userScores);
+    return matches[0] || null;
+  }, [userScores]);
 
   if (!isOpen) return null;
 
@@ -113,11 +143,18 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               <Brain className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold text-stone-900">Cognitive & Social DNA Profile</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
                   {completeness}% Synthesized
                 </span>
+                {topArchetype && (
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200 flex items-center gap-1.5">
+                    <Compass className="w-3 h-3 text-amber-600" />
+                    <span>{topArchetype.archetype.name}</span>
+                    <span className="text-amber-700 font-bold">({topArchetype.similarityScore}%)</span>
+                  </span>
+                )}
               </div>
               <p className="text-xs text-stone-500">
                 Extracted from your real conversational choices, logic, social empathy, and tone
